@@ -4,15 +4,17 @@ import cv2
 dicio = {'black' : [0, 0, 0],
          'white' : [219,247,255],
          'red' : [0, 0, 255],
-         'green' : [0, 255, 0],
+         'green' : [0, 200, 0],
          'blue' : [255, 0, 0],
          'beige' : [148,205,255],
          'brown' : [37,62,107]}
 
+
+
 def closer (point, dicio):
     best_eval = int(1000)
     for i in dicio:
-        evaluation = abs((dicio[i][0] - point[0]) + (dicio[i][1] - point[1]) + (dicio[i][2] - point[2]))
+        evaluation = abs((dicio[i][0] - point[0])) + abs((dicio[i][1] - point[1])) + abs((dicio[i][2] - point[2]))
         if evaluation < best_eval:
             best_eval = evaluation
             color = dicio[i]

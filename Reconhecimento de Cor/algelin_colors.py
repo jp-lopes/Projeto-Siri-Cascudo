@@ -72,27 +72,29 @@ class coor:
 
 # Código clássico de visão computacional
 # Válido notar que só está sendo analisado o pixel central da câmera
-cap = cv2.VideoCapture(0)
-while True:
 
-    ret, frame = cap.read()
-    height, width, _ = frame.shape
+if __name__ == '__main__':
+    cap = cv2.VideoCapture(0)
+    while True:
 
-    point = frame[int(height/2), int(width/2)]
+        ret, frame = cap.read()
+        height, width, _ = frame.shape
 
-    point2 = np.array(point).tolist()
+        point = frame[int(height/2), int(width/2)]
 
-    color = coor(point2)
+        point2 = np.array(point).tolist()
 
-    font = cv2.FONT_HERSHEY_SIMPLEX 
-    frame = cv2.circle(frame, ((width)//2,(height)//2), 6, (0,0,255), 2)
-    frame = cv2.putText(frame, color.escolha(), (int(height/2 - 10/2), int(width/2 - 10/2)), font, 1, (32,94,27), 3, cv2.LINE_AA)
-    print(color)
+        color = coor(point2)
 
-    cv2.imshow('Image', frame)
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        frame = cv2.circle(frame, ((width)//2,(height)//2), 6, (0,0,255), 2)
+        frame = cv2.putText(frame, color.escolha(), (int(height/2 - 10/2), int(width/2 - 10/2)), font, 1, (32,94,27), 3, cv2.LINE_AA)
+        print(color)
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        cv2.imshow('Image', frame)
 
-cap.release()
-cv2.destroyAllWindows()
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
