@@ -39,14 +39,22 @@ class coor:
     # A escolha dos parametros das proximas cores foi obtida de maneira empirica, anotando os dados obtidos ao observar diferentes tonalidades de cada cor
         # Para fazer analises, basta imprimir um objeto desta classe e ver quais são os maximos e minimos alcançados pelos angulos
 
+    def ciano(self):
+        if (self.theta > 70 and self.theta < 85 and self.phi > 70 and self.phi < 85 and self.sigma > 40 and self.sigma < 60):
+            return 'Ciano'
+
     def azul(self):
         if (self.theta > 50 and self.theta < 66 and self.phi > 50 and self.phi < 80 and self.sigma > 50 and self.sigma < 80):
             return 'Azul'
         
+    def magenta(self):
+        if (self.theta > 15 and self.theta < 32 and self.phi > 30 and self.phi < 60 and self.sigma > 56 and self.sigma < 76):
+            return 'Magenta'
+
     def vermelho(self):
         if (self.theta > 8 and self.theta < 25 and self.phi > 11 and self.phi < 40 and self.sigma > 42 and self.sigma < 63):
             return 'Vermelho'
-        
+
     def verde(self):
         if (self.theta > 45 and self.theta < 71 and self.phi > 21 and self.phi < 60 and self.sigma > 12 and self.sigma < 40):
             return 'Verde'
@@ -58,7 +66,7 @@ class coor:
     # Loop que passa por cada cor definida nessa classe
     def escolha(self):
         # chama cada função e retorna a primeira que não for None
-        for detector in (self.preto, self.cinza_e_branco, self.azul, self.vermelho, self.verde, self.amarelo):
+        for detector in (self.preto, self.cinza_e_branco, self.ciano, self.azul, self.magenta, self.vermelho, self.verde, self.amarelo):
             cor = detector()
             if cor is not None:
                 return cor
@@ -88,7 +96,7 @@ if __name__ == '__main__':
 
         font = cv2.FONT_HERSHEY_SIMPLEX 
         frame = cv2.circle(frame, ((width)//2,(height)//2), 6, (0,0,255), 2)
-        frame = cv2.putText(frame, color.escolha(), (int(height/2 - 10/2), int(width/2 - 10/2)), font, 1, (32,94,27), 3, cv2.LINE_AA)
+        frame = cv2.putText(frame, color.escolha(), (100,100), font, 1, (32,94,27), 3, cv2.LINE_AA)
         print(color)
 
         cv2.imshow('Image', frame)
