@@ -9,8 +9,8 @@ bridge = CvBridge()
 cap = cv2.VideoCapture(0)
 
 def camera_pub(cap):
-    pub = rospy.Publisher("camera_pub",Image,queue_size=10)
-    rospy.init_node("camera_pub", anonymous=True)
+    pub = rospy.Publisher("frame",Image,queue_size=10)
+    rospy.init_node("camera_pub")
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         ret, frame = cap.read()
