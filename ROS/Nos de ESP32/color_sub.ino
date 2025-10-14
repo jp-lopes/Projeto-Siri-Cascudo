@@ -7,11 +7,11 @@
 
 ros::NodeHandle nh;
 
-void messageCb( const std_msgs::String& toggle_msg){
-  digitalWrite(LED, HIGH-digitalRead(LED));   // blink the led
+void callback( const std_msgs::String& cor_detectada){
+  if(cor_detectada == "Blue") digitalWrite(LED, HIGH-digitalRead(LED));   // pisca o LED se detectar cor azul
 }
 
-ros::Subscriber<std_msgs::String> if()sub("cor_detectada", &messageCb );
+ros::Subscriber<std_msgs::String> sub("cor_detectada", &callback );
 
 void setup()
 {
