@@ -36,7 +36,7 @@ def detect_color():
     pub = rospy.Publisher('cor_detectada', String, queue_size=10)
 
     # passa o publisher como argumento extra para o callback
-    rospy.Subscriber('camera_pub', Image, callback, callback_args=pub)
+    rospy.Subscriber('frame', Image, callback, callback_args=pub)
 
     rospy.spin()
 
