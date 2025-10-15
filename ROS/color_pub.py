@@ -57,6 +57,7 @@ def callback(imgmsg, pub):
             mask = cv2.inRange(hsv, color.lower, color.upper)   #Cria máscara com cada cor da lista de cores
             if mask[height//2][width//2] == 255:   
                 pub.publish(color.name)  # publica a cor detectada
+                rospy.loginfo(f"Cor detectada: {color.name}")
                 break
 
 def detect_color():
@@ -70,4 +71,7 @@ def detect_color():
     rospy.spin()
 
 if __name__ == '__main__':
-    detect_color()
+    try:
+        detect_color()
+    except rospy.ROSInterruptException:
+        pass
