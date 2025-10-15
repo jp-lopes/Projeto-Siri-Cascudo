@@ -1,14 +1,20 @@
 #include <ros.h>
 #include <std_msgs/String.h>
+#include <string.h>
 
 #define LED 9
-
-//AINDA NAO ESTA FUNCIONAL (ACHO)
 
 ros::NodeHandle nh;
 
 void callback( const std_msgs::String& cor_detectada){
-  if(cor_detectada == "Blue") digitalWrite(LED, HIGH-digitalRead(LED));   // pisca o LED se detectar cor azul
+  if(strcmp(cor_detectada.data,"Blue")==0) {
+    digitalWrite(LED, HIGH);  // pisca o LED se detectar cor azul
+    nh.loginfo("Azul detectado");
+  }
+  else {
+    digitalWrite(LED, LOW);
+    nh.loginfo("Azul nao foi detectado");
+  }
 }
 
 ros::Subscriber<std_msgs::String> sub("cor_detectada", &callback );
