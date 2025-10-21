@@ -8,13 +8,12 @@ from cv_bridge import CvBridge, CvBridgeError
 bridge = CvBridge()
 cap = cv2.VideoCapture(0)
 
-def camera_pub(cap):
-    pub = rospy.Publisher("camera_pub",Image,queue_size=10)
-    rospy.init_node("camera_pub", anonymous=True)
+def publish_camera(cap):
+    pub = rospy.Publisher("frame",Image,queue_size=10)
+    rospy.init_node("camera_pub")
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         ret, frame = cap.read()
-        rospy.loginfo("Câmera Publicada!")
         if not ret:
             rospy.loginfo("Erro na abertura da câmera.")
             break
@@ -25,11 +24,12 @@ def camera_pub(cap):
                 rospy.loginfo("Erro na conversão de imagem.")
             else:
                 pub.publish(msg)
+                rospy.loginfo("Câmera Publicada!")
     rate.sleep()
 
 if __name__ == '__main__':
     try:
-        camera_pub(cap)
+        publish_camera(cap)
         cap.release()
     except rospy.ROSInterruptException:
         pass

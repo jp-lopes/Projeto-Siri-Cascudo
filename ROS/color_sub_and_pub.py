@@ -5,7 +5,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-from beter_colors import coor
+from algelin_colors import coor
 
 bridge = CvBridge()
 
@@ -36,7 +36,7 @@ def detect_color():
     pub = rospy.Publisher('cor_detectada', String, queue_size=10)
 
     # passa o publisher como argumento extra para o callback
-    rospy.Subscriber('camera_pub', Image, callback, callback_args=pub)
+    rospy.Subscriber('frame', Image, callback, callback_args=pub)
 
     rospy.spin()
 

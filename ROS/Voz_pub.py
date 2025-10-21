@@ -6,7 +6,7 @@ from std_msgs.msg import String
 
 def asking():
     pub = rospy.Publisher('frases', String, queue_size=10)
-    rospy.init_node('Ouvindo_vozes')
+    rospy.init_node('voz_pub')
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():
 
