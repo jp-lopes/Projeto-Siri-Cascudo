@@ -6,4 +6,5 @@ Nesse repositório, será criado o maior robô bípede da história da humanidad
 
 
 **Diagrama do nós e tópicos atuais**
-<img width="1699" height="880" alt="PB ROS" src="https://github.com/user-attachments/assets/27cf75da-b6ab-43ee-975f-9940235673c4" />
+
+<img width="2180" height="950" alt="2-PB_ROS" src="https://github.com/user-attachments/assets/fdee3cce-ca6b-4f34-a2d3-f06470de6185" />
