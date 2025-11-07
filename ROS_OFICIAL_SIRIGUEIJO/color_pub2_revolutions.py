@@ -7,18 +7,14 @@ import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 
-#Definição da classe cor
-class color:
-    name = ""
-    lower = np.array([-1,-1,-1])
-    upper = np.array([-1,-1,-1])
+parar_flag = True
 
+class color:
     def __init__(self, name, lower, upper):
         self.name = name
         self.lower = lower
         self.upper = upper
 
-#Criação das instâncias de cor
 black   = color("Black",            np.array([0, 0, 0]),        np.array([180, 255, 50]))
 gray    = color("Gray",             np.array([0, 0, 50]),       np.array([180, 50, 200]))
 white   = color("White",            np.array([0, 0, 200]),      np.array([180, 30, 255]))
@@ -37,38 +33,55 @@ magenta = color("Magenta",          np.array([150, 50, 50]),    np.array([160, 2
 pink    = color("Pink",             np.array([160, 50, 150]),   np.array([170, 150, 255]))
 brown = color("Brown",              np.array([10, 50, 50]),     np.array([20, 255, 150]))
 
-# Lista de cores que serão detectadas
-colors_list = [black, gray, white, red1, red2, orange, beige, yellow, green, light_green, 
-               cyan, light_blue, blue, purple, magenta, pink, brown]
+colors_list = [
+    black, gray, white, red1, red2, orange, beige, yellow, green, light_green,
+    cyan, light_blue, blue, purple, magenta, pink, brown
+]
 
 bridge = CvBridge()
 
 def callback(imgmsg, pub):
+    global parar_flag
+    if parar_flag:
+        return  # Ignora frames se estiver desativado
+
     try:
-        frame = bridge.imgmsg_to_cv2(imgmsg, "bgr8")            #Conversão da imagem msg para cv2
+        frame = bridge.imgmsg_to_cv2(imgmsg, "bgr8")  # Converte msg ROS -> OpenCV
     except CvBridgeError:
         rospy.loginfo("Erro na conversão da imagem.")
-    else:        
-        height, width, a = frame.shape
+        return
 
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)            #Conversão para escala HSV
+    height, width, _ = frame.shape
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        for color in colors_list:                               
-            mask = cv2.inRange(hsv, color.lower, color.upper)   #Cria máscara com cada cor da lista de cores
-            if mask[height//2][width//2] == 255:   
-                pub.publish(color.name)  # publica a cor detectada
-                rospy.loginfo(f"Cor detectada: {color.name}")
-                break
+    for color in colors_list:
+        mask = cv2.inRange(hsv, color.lower, color.upper)
+        if mask[height // 2][width // 2] == 255:
+            pub.publish(color.name)
+            rospy.loginfo(f"Cor detectada: {color.name}")
+            break
+
+def llacfront(data):
+    global parar_flag
+    if data.data == 'COR':
+        parar_flag = False
+        rospy.loginfo(" Deteccao de cor ATIVADA.")
+    elif data.data == 'DESATIVAR':
+        parar_flag = True
+        rospy.loginfo(" Deteccao de cor DESATIVADA.")
+    else:
+        rospy.loginfo(f"Comando desconhecido: {data.data}")
 
 def detect_color():
     rospy.init_node('detect_color')
 
     pub = rospy.Publisher('cor_detectada', String, queue_size=10)
-
-    # passa o publisher como argumento extra para o callback
+    rospy.Subscriber('comandos', String, llacfront)
     rospy.Subscriber('frame', Image, callback, callback_args=pub)
 
+    rospy.loginfo(" No detect_color iniciado. Aguardando comandos...")
     rospy.spin()
+
 
 if __name__ == '__main__':
     try:
