@@ -65,10 +65,10 @@ def llacfront(data):
     global parar_flag
     if data.data == 'COR':
         parar_flag = False
-        rospy.loginfo(" Deteccao de cor ATIVADA.")
+        rospy.loginfo(" Deteccao de COR ATIVADA.")
     elif data.data == 'DESATIVAR':
         parar_flag = True
-        rospy.loginfo(" Deteccao de cor DESATIVADA.")
+        rospy.loginfo(" Deteccao de COR DESATIVADA.")
     else:
         rospy.loginfo(f"Comando desconhecido: {data.data}")
 
@@ -88,3 +88,4 @@ if __name__ == '__main__':
         detect_color()
     except rospy.ROSInterruptException:
         pass
+

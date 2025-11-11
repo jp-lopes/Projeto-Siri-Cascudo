@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import String
 from unidecode import unidecode
 
-comandos = ['camera', 'cor', 'gestos', 'desativar']
+comandos = ['camera', 'cor', 'gestos', 'desativar', 'voz']
 palavras_chave = ['dinheiro', 'plankton', 'plancton', 'lula', 'molusco', 'platelminto']
 
 class VozNode:
