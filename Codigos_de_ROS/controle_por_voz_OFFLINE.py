@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import speech_recognition as sr
 import rospy
 from std_msgs.msg import String
 from unidecode import unidecode
@@ -9,34 +8,66 @@ from vosk import Model, KaldiRecognizer
 import pyaudio
 import json
 
-#Offline porem meio burro
-
-comandos = ['ativar camera', 'ativar a camera', 'ativar cor', 'ativar gestos', 'desativar tudo']
-palavras_chave = ['dinheiro', 'plankton', 'plancton', 'lula', 'molusco', 'platelminto']
-
 class VozNode:
     def __init__(self):
         rospy.init_node('controle_por_voz')
+
+        default_map = {
+            'camera': 'CAMERA_CMD',
+            'cores': 'CORES_CMD',
+            'gestos': 'GESTOS_CMD',
+            'desativar': 'DESATIVAR_CMD',
+            'dinheiro': 'KEY_CMD',
+            'plankton': 'PLANKTON_CMD',
+            'plancton': 'PLANKTON_CMD',
+            'lula': 'LULA_CMD',
+            'molusco': 'LULA_CMD',
+            'caramba': 'KEY_CMD'
+        }
+        
+        self.mapa_comandos = rospy.get_param('~mapa_comandos', default_map)
+        self.model_path = rospy.get_param('~model_path', '/home/jplop/model-pt')
+
         self.pub = rospy.Publisher('comandos', String, queue_size=10)
 
-        rospy.loginfo("Carregando modelo Vosk...")
-        self.model = Model("/home/jplop/model-pt")
+        rospy.loginfo("Carregando modelo Vosk de: " + self.model_path)
+        
+        self.model = None
+        self.audio = None
+        self.stream = None
+
+        try:
+            self.model = Model(self.model_path)
+        except Exception as e:
+            rospy.logerr(f"Falha ao carregar modelo Vosk: {self.model_path}")
+            rospy.logerr(f"Erro: {e}")
+            rospy.signal_shutdown("Erro no modelo Vosk")
+            return
+
         self.rec = KaldiRecognizer(self.model, 16000)
 
-        self.audio = pyaudio.PyAudio()
-        self.stream = self.audio.open(format=pyaudio.paInt16,
-                                      channels=1,
-                                      rate=16000,
-                                      input=True,
-                                      frames_per_buffer=4096)
-        self.stream.start_stream()
+        try:
+            self.audio = pyaudio.PyAudio()
+            self.stream = self.audio.open(format=pyaudio.paInt16,
+                                          channels=1,
+                                          rate=16000,
+                                          input=True,
+                                          frames_per_buffer=4096)
+            self.stream.start_stream()
+        except Exception as e:
+            rospy.logerr(f"Falha ao abrir stream de áudio (PyAudio).")
+            rospy.logerr(f"Erro: {e}")
+            rospy.signal_shutdown("Erro no PyAudio")
+            return
+
         rospy.loginfo("Modelo carregado. Pronto para ouvir!")
 
 
     def detectarComandosDeVoz(self):
         rate = rospy.Rate(20)
-        try:
-            while not rospy.is_shutdown():
+        
+        while not rospy.is_shutdown():
+            try:
                 data = self.stream.read(4096, exception_on_overflow=False)
 
                 if self.rec.AcceptWaveform(data):
@@ -47,27 +78,46 @@ class VozNode:
                         texto_processado = unidecode(texto.lower())
                         rospy.loginfo("Reconhecido: " + texto_processado)
 
-                        # Detectar comandos exatos
-                        if texto_processado in comandos:
-                            self.pub.publish(texto_processado.upper())
-                            rospy.loginfo("Comando detectado: " + texto_processado.upper())
+                        publicado = False
+                        
+                        if texto_processado in self.mapa_comandos:
+                            comando_publicar = self.mapa_comandos[texto_processado]
+                            self.pub.publish(comando_publicar)
+                            rospy.loginfo(f"Frase '{texto_processado}' ativou: {comando_publicar}")
+                            publicado = True
+                        
+                        if not publicado:
+                            for palavra in texto_processado.split():
+                                if palavra in self.mapa_comandos:
+                                    comando_publicar = self.mapa_comandos[palavra]
+                                    self.pub.publish(comando_publicar)
+                                    rospy.loginfo(f"Palavra '{palavra}' ativou: {comando_publicar}")
+                                    break
+            
+            except IOError as e:
+                rospy.logwarn(f"Erro de I/O no stream: {e}")
+            
+            rate.sleep()
 
-                        # Palavras chave
-                        for palavra in texto_processado.split():
-                            if palavra in palavras_chave:
-                                self.pub.publish(palavra)
-                                rospy.loginfo("Palavra chave detectada: " + palavra)
-                                break
+    def cleanup(self):
+        rospy.loginfo("Encerrando nó e fechando stream de áudio...")
+        if self.stream:
+            self.stream.stop_stream()
+            self.stream.close()
+        if self.audio:
+            self.audio.terminate()
+        rospy.loginfo("Stream fechado.")
 
-                rate.sleep()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            rospy.loginfo("Encerrando nó...")
-        
 if __name__ == '__main__':
+    controleVoz = None
     try:
         controleVoz = VozNode()
-        controleVoz.detectarComandosDeVoz()
+        if not rospy.is_shutdown(): 
+            controleVoz.detectarComandosDeVoz()
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("Interrupção do ROS recebida.")
+    except Exception as e:
+        rospy.logerr(f"Erro inesperado no main: {e}")
+    finally:
+        if controleVoz:
+            controleVoz.cleanup()
