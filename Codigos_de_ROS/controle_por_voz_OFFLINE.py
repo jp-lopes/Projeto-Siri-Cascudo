@@ -15,6 +15,7 @@ class VozNode:
         default_map = {
             'camera': 'CAMERA',
             'cores': 'COR',
+            'cor': 'COR',
             'gestos': 'GESTOS',
             'desativar': 'DESATIVAR',
             'dinheiro': 'dinheiro',
