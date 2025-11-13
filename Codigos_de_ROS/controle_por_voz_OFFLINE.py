@@ -13,16 +13,16 @@ class VozNode:
         rospy.init_node('controle_por_voz')
 
         default_map = {
-            'camera': 'CAMERA_CMD',
-            'cores': 'CORES_CMD',
-            'gestos': 'GESTOS_CMD',
-            'desativar': 'DESATIVAR_CMD',
-            'dinheiro': 'KEY_CMD',
-            'plankton': 'PLANKTON_CMD',
-            'plancton': 'PLANKTON_CMD',
-            'lula': 'LULA_CMD',
-            'molusco': 'LULA_CMD',
-            'caramba': 'KEY_CMD'
+            'camera': 'CAMERA',
+            'cores': 'COR',
+            'gestos': 'GESTOS',
+            'desativar': 'DESATIVAR',
+            'dinheiro': 'dinheiro',
+            'plankton': 'plancton',
+            'plancton': 'plancton',
+            'lula': 'lula',
+            'molusco': 'molusco',
+            'caramba': 'caramba'
         }
         
         self.mapa_comandos = rospy.get_param('~mapa_comandos', default_map)
