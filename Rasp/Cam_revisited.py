@@ -18,44 +18,66 @@ def callback(data):
         parar_flag = False
         rospy.loginfo("Captura desativada.")
 
+def abrir_camera():
+    cap = cv2.VideoCapture(-1, cv2.CAP_V4L2)
+
+    if not cap.isOpened():
+        rospy.logerr("Falha ao abrir a câmera.")
+        return None
+
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap.set(cv2.CAP_PROP_FPS, 10)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+    rospy.loginfo("Câmera ligada.")
+    return cap
+
 def cam_pub():
     global cap
     rospy.init_node("camera_pub2")
-    pub = rospy.Publisher("frame", Image, queue_size=10)
+    pub = rospy.Publisher("frame", Image, queue_size=1)
     rospy.Subscriber("comandos", String, callback)
     rate = rospy.Rate(10)
 
     try:
         while not rospy.is_shutdown():
-            if parar_flag:
-                if cap is None or not cap.isOpened():
-                    cap = cv2.VideoCapture(-1)
 
-                ret, frame = cap.read()
+            if parar_flag:
+                if cap is None:
+                    cap = abrir_camera()
+                    if cap is None:
+                        rate.sleep()
+                        continue
+
+                cap.grab()
+                ret, frame = cap.retrieve()
+
                 if not ret:
-                    rospy.logwarn("Erro ao capturar frame.")
-                else:
-                    try:
-                        msg = bridge.cv2_to_imgmsg(frame, "bgr8")
-                        pub.publish(msg)
-                        rospy.loginfo("Frame publicado!")
-                    except CvBridgeError as e:
-                        rospy.logerr(f"Erro na conversão: {e}")
-            else:
-                if cap is not None and cap.isOpened():
+                    rospy.logwarn("Erro ao capturar frame. Reiniciando câmera...")
                     cap.release()
+                    cap = None
+                    rospy.sleep(0.3)
+                    continue
+
+                try:
+                    msg = bridge.cv2_to_imgmsg(frame, "bgr8")
+                    pub.publish(msg)
+                except CvBridgeError as e:
+                    rospy.logerr(f"Erro conversão: {e}")
+
+            else:
+                if cap is not None:
+                    rospy.loginfo("Câmera desativada!")
+                    cap.release()
+                    cap = None
 
             rate.sleep()
 
-    except KeyboardInterrupt:
-        pass
     finally:
         rospy.loginfo("Encerrando nó...")
-        if cap is not None and cap.isOpened():
+        if cap is not None:
             cap.release()
 
 if __name__ == '__main__':
-    try:
-        cam_pub()
-    except rospy.ROSInterruptException:
-        pass
+    cam_pub()
