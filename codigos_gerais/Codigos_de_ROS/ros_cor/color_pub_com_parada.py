@@ -41,6 +41,9 @@ colors_list = [
 bridge = CvBridge()
 
 def callback(imgmsg, pub):
+    global parar_flag
+    if parar_flag:
+        return  # Ignora frames se estiver desativado
 
     try:
         frame = bridge.imgmsg_to_cv2(imgmsg, "bgr8")  # Converte msg ROS -> OpenCV
@@ -58,10 +61,22 @@ def callback(imgmsg, pub):
             rospy.loginfo(f"Cor detectada: {color.name}")
             break
 
+def llacfront(data):
+    global parar_flag
+    if data.data == 'COR':
+        parar_flag = False
+        rospy.loginfo(" Deteccao de COR ATIVADA.")
+    elif data.data == 'DESATIVAR':
+        parar_flag = True
+        rospy.loginfo(" Deteccao de COR DESATIVADA.")
+    else:
+        rospy.loginfo(f"Comando desconhecido: {data.data}")
+
 def detect_color():
     rospy.init_node('detect_color')
 
     pub = rospy.Publisher('cor_detectada', String, queue_size=10)
+    rospy.Subscriber('comandos', String, llacfront)
     rospy.Subscriber('frame', Image, callback, callback_args=pub)
 
     rospy.loginfo(" No detect_color iniciado. Aguardando comandos...")
