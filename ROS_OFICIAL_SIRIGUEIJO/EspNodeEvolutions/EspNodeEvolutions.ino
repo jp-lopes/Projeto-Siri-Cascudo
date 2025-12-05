@@ -81,10 +81,10 @@ Servo servo[6];
 
 
 // ESTADOS A SEREM ATUALIZADOS:
-float distanceDetectedCm;
-int luminosidade; 
-int cor = NADA;
-int comando = NADA;
+volatile float distanceDetectedCm;
+volatile int luminosidade; 
+volatile int cor = NADA;
+volatile int comando = NADA;
 volatile bool andando = false;
 volatile bool ROSconectado = false;
 int pos_cur_pedir;  
@@ -139,8 +139,7 @@ void comando_callback(const std_msgs::String& comando_detectado){
 ros::Subscriber<std_msgs::String> sub_cor("cor_detectada", &cor_callback);
 ros::Subscriber<std_msgs::String> sub_comandos("comandos", &comando_callback);
 
-void setup()
-{
+void setup() {
   Serial.begin(BAUD_RATE);
   nh.getHardware()->setPort(&Serial);
   nh.getHardware()->setBaud(BAUD_RATE);
@@ -179,29 +178,41 @@ void setup()
   xTaskCreatePinnedToCore(Task2code, "Task2", 8192, NULL, 1, &Task2, 1);          
 }
 
-void loop(){}
+void loop(){
+    nh.spinOnce();
+    ROSconectado = nh.connected();
+
+    // Printa distancia 5 vezes por segundo (a cada 200ms)
+    static unsigned long timer = 0;
+    if( (millis() - timer > 200) && ROSconectado) { 
+      timer = millis();
+      char buffer[50];
+      float valor = (float)distanceDetectedCm; 
+      sprintf(buffer, "Distancia: %.2f cm", valor);
+      nh.loginfo(buffer);
+    }
+
+    vTaskDelay(2 / portTICK_PERIOD_MS);
+
+}
 
 // Task1code: controla os sensores
 void Task1code(void *pvParameters){
   while(true){
-    detectaDistancia();
-    nh.spinOnce();
-    ROSconectado = nh.connected();
-    vTaskDelay(2 / portTICK_PERIOD_MS);
+    if(!ROSconectado) {vTaskDelay(20 / portTICK_PERIOD_MS); continue;}
+    detectaDistancia();   
+    vTaskDelay(40 / portTICK_PERIOD_MS); //25Hz
   }
 }
 
 //Task2code: controla o andar do robô
 void Task2code( void * pvParameters ){
   const TickType_t tempoTicks = 50 / portTICK_PERIOD_MS;
-  const TickType_t rate_10hz = 100 / portTICK_PERIOD_MS;
-
   while(true){
-    if(ROSconectado){
-      nh.loginfo(distancia);
-      //DaUmPassoFrente();
-    }
-    vTaskDelay(rate_10hz);
+    if(!ROSconectado) {vTaskDelay(20 / portTICK_PERIOD_MS); continue;}
+    //codigo task 2
+    //DaUmPassoFrente();
+    vTaskDelay(tempoTicks);
   }
 }
 
@@ -486,7 +497,7 @@ void detectaDistancia() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  int duration = pulseIn(echoPin, HIGH, 30000);
+  int duration = pulseIn(echoPin, HIGH, 20000);
   distanceDetectedCm = duration * SOUND_SPEED / 2;
 }
 
