@@ -245,7 +245,7 @@ void Task2code( void * pvParameters ){
   const TickType_t tempoTicks = 50 / portTICK_PERIOD_MS;
   while(true){
     if(!ROSconectado) {vTaskDelay(20 / portTICK_PERIOD_MS); continue;}
-    if(comando == ANDAR && (distanceDetectedCm > 10)){
+    if(comando == ANDAR && (distanceDetectedCm>10 || distanceDetectedCm<1)){
       DaUmPassoFrente();
     } 
     else if(comando == BALADA){
@@ -456,8 +456,8 @@ void UmSwing() {
   /* Valores ja definidos */ 
   int intervalo = 50;          /* Intervalo de tempo entre os passos */
   int qtde_iteracoes = 5;
-  int pos_max_pedir = 30; 
-  int pos_max_peesq = 130; 
+  int pos_max_pedir = 40; 
+  int pos_max_peesq = 105; 
 
   // ----------------------------- PRIMEIRA PARTE: Movimento comeca pela parte direita 
   /* Movimento ascendente do pe direito */
@@ -486,10 +486,6 @@ void UmSwing() {
   moveUmServoSuavemente(PEESQ,&pos_cur_peesq,pos_padrao_esquerdo,qtde_iteracoes,intervalo);
 }
 
-// ESSA FUNCAO TEM COMO FONTE O MODO "TIPTOE SWING" DO VIDEO https://www.youtube.com/watch?v=VD6sgTo6NOY
-void UmSwingQuadris() {
-}
-
 /* ----------------------------------- ######### FUNCAO PRINCIPAL DE ANDAR ########### --------------------------- 
 --------- ###### OBSERVACOES SOBRE ESSA FUNCAO ######### ------------- 
 - O movimento dos pes esta sincronizado 
@@ -500,11 +496,11 @@ NAO FAZER NENHUM MOVIMENTO BRUSCO!
 */
 void DaUmPassoFrente() {
   /* Valores ja definidos */ 
-  int intervalo = 25;          /* Intervalo de tempo entre os passos */
+  int intervalo = 50;          /* Intervalo de tempo entre os passos */
   int pos_max_quadril_direita = 105;    /* A posicao minima deve ser a posicao padrao */
   int pos_max_quadril_esquerda = 75; 
-  int pos_max_pe_direito = 35;
-  int pos_max_pe_esquerdo = 120;  
+  int pos_max_pe_direito = 40;
+  int pos_max_pe_esquerdo = 105;  
   /* Espera-se que as posicoes minimas para ambos os pes sejam a mesma, que vai ser a posicao padrao. Sendo minimas as posicoes de menor diferenca em relacao ao solo.*/
   int pos_min_quadrildireito = pos_wait_quadrildireito; // DEPOIS REVER  SE PRECISA DESSA PARTE -> TALVEZ SO ALTERNE ENTRE AS POSICOES MAXIMAS E AS PADROES 
   int pos_min_quadrilesquerdo = pos_wait_quadrilesquerdo; 
@@ -544,11 +540,11 @@ Video de referencia: https://www.youtube.com/watch?v=VD6sgTo6NOY      - Minuto a
 
 */
 void DesviaUmLado(int side) {
-  int intervalo = 25;          /* Intervalo de tempo entre os passos */
+  int intervalo = 50;          /* Intervalo de tempo entre os passos */
   int pos_max_quadril_direita = 105;    /* A posicao minima deve ser a posicao padrao */
   int pos_max_quadril_esquerda = 75; 
-  int pos_max_pe_direito = 35;
-  int pos_max_pe_esquerdo = 120;  
+  int pos_max_pe_direito = 40;
+  int pos_max_pe_esquerdo = 105;  
   /* Espera-se que as posicoes minimas para ambos os pes sejam a mesma, que vai ser a posicao padrao. Sendo minimas as posicoes de menor diferenca em relacao ao solo.*/
   int pos_min_quadrildireito = pos_wait_quadrildireito; // DEPOIS REVER  SE PRECISA DESSA PARTE -> TALVEZ SO ALTERNE ENTRE AS POSICOES MAXIMAS E AS PADROES 
   int pos_min_quadrilesquerdo = pos_wait_quadrilesquerdo; 
