@@ -16,6 +16,8 @@ class VozNode:
             'camera': 'CAMERA',
             'cores': 'COR',
             'cor': 'COR',
+            'parar' : 'PARAR',
+            'para' : 'PARAR',
             'gestos': 'GESTOS',
             'desativar': 'DESATIVAR',
             'dinheiro': 'dinheiro',
@@ -26,7 +28,14 @@ class VozNode:
             'caramba': 'caramba',
             'balada' : 'balada',
             'sensor' : 'sensor',
-            'andar' : 'andar'
+            'andar' : 'andar',
+            'dançar' : 'dancar',
+            'dancar' : 'dancar',
+            'dança' : 'dancar',
+            'presidente' : 'dancar',
+            'dancinha' : 'dancar',
+            'direita' : 'direita',
+            'esquerda' : 'esquerda'
         }
         
         self.mapa_comandos = rospy.get_param('~mapa_comandos', default_map)
